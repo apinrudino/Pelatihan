@@ -1,0 +1,243 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #141e30, #243b55);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .calculator {
+            width: 320px;
+            padding: 20px;
+            background: #1e293b;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #display {
+            width: 100%;
+            height: 75px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #f1f5f9;
+            color: #111827;
+            font-size: 30px;
+            text-align: right;
+            outline: none;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            height: 55px;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #334155;
+            color: white;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            filter: brightness(1.2);
+            transform: scale(1.03);
+        }
+
+        .operator {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .clear {
+            background: #ef4444;
+        }
+
+        .equal {
+            background: #22c55e;
+            grid-column: span 2;
+        }
+
+        .zero {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="calculator">
+        <h2>Kalkulator</h2>
+
+        <input
+            type="text"
+            id="display"
+            value="0"
+            readonly
+            aria-label="Layar kalkulator"
+        >
+
+        <div class="buttons">
+            <button class="clear" onclick="clearDisplay()">C</button>
+            <button onclick="deleteLast()">DEL</button>
+            <button class="operator" onclick="chooseOperator('%')">%</button>
+            <button class="operator" onclick="chooseOperator('/')">÷</button>
+
+            <button onclick="appendNumber('7')">7</button>
+            <button onclick="appendNumber('8')">8</button>
+            <button onclick="appendNumber('9')">9</button>
+            <button class="operator" onclick="chooseOperator('*')">×</button>
+
+            <button onclick="appendNumber('4')">4</button>
+            <button onclick="appendNumber('5')">5</button>
+            <button onclick="appendNumber('6')">6</button>
+            <button class="operator" onclick="chooseOperator('-')">−</button>
+
+            <button onclick="appendNumber('1')">1</button>
+            <button onclick="appendNumber('2')">2</button>
+            <button onclick="appendNumber('3')">3</button>
+            <button class="operator" onclick="chooseOperator('+')">+</button>
+
+            <button class="zero" onclick="appendNumber('0')">0</button>
+            <button onclick="appendDecimal()">.</button>
+            <button class="equal" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById("display");
+
+        let currentValue = "0";
+        let previousValue = null;
+        let operator = null;
+        let shouldReset = false;
+
+        function updateDisplay() {
+            display.value = currentValue;
+        }
+
+        function appendNumber(number) {
+            if (currentValue === "Error" || shouldReset) {
+                currentValue = number;
+                shouldReset = false;
+            } else if (currentValue === "0") {
+                currentValue = number;
+            } else {
+                currentValue += number;
+            }
+
+            updateDisplay();
+        }
+
+        function appendDecimal() {
+            if (currentValue === "Error" || shouldReset) {
+                currentValue = "0.";
+                shouldReset = false;
+            } else if (!currentValue.includes(".")) {
+                currentValue += ".";
+            }
+
+            updateDisplay();
+        }
+
+        function chooseOperator(selectedOperator) {
+            if (currentValue === "Error") return;
+
+            if (operator !== null && !shouldReset) {
+                calculate();
+            }
+
+            previousValue = parseFloat(currentValue);
+            operator = selectedOperator;
+            shouldReset = true;
+        }
+
+        function calculate() {
+            if (operator === null || previousValue === null) return;
+
+            const current = parseFloat(currentValue);
+            let result;
+
+            switch (operator) {
+                case "+":
+                    result = previousValue + current;
+                    break;
+                case "-":
+                    result = previousValue - current;
+                    break;
+                case "*":
+                    result = previousValue * current;
+                    break;
+                case "/":
+                    result = current === 0
+                        ? NaN
+                        : previousValue / current;
+                    break;
+                case "%":
+                    result = previousValue % current;
+                    break;
+            }
+
+            if (!Number.isFinite(result)) {
+                currentValue = "Error";
+            } else {
+                currentValue = String(
+                    Number(result.toPrecision(12))
+                );
+            }
+
+            previousValue = null;
+            operator = null;
+            shouldReset = true;
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentValue = "0";
+            previousValue = null;
+            operator = null;
+            shouldReset = false;
+            updateDisplay();
+        }
+
+        function deleteLast() {
+            if (currentValue === "Error" || shouldReset) {
+                currentValue = "0";
+                shouldReset = false;
+            } else {
+                currentValue = currentValue.slice(0, -1) || "0";
+            }
+
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
